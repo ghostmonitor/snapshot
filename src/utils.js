@@ -1,8 +1,17 @@
+/* global Cypress */
 const sd = require('@wildpeaks/snapshot-dom')
 const beautify = require('js-beautify').html
 
 // converts DOM element to a JSON object
-function serializeDomElement ($el) {
+function serializeDomElement ($el, { not }) {
+  if (not) {
+    $el.find('*').each(function () {
+      if (Cypress.$(this).is(not)) {
+        this.remove()
+      }
+    })
+  }
+
   // console.log('snapshot value!', $el)
   const json = sd.toJSON($el[0])
   // console.log('as json', json)
@@ -24,16 +33,26 @@ function deleteReactIdFromJson (json) {
   if (Array.isArray(json.childNodes)) {
     json.childNodes.forEach(deleteReactIdFromJson)
   }
+
   return json
 }
 
 const stripReactIdAttributes = (html) => {
   const dataReactId = /data\-reactid="[\.\d\$\-abcdfef]+"/g
+
   return html.replace(dataReactId, '')
 }
 
-const serializeReactToHTML = (el$) => {
-  const html = el$[0].outerHTML
+const serializeReactToHTML = ($el, { not }) => {
+  if (not) {
+    $el.find('*').each(function () {
+      if (Cypress.$(this).is(not)) {
+        this.remove()
+      }
+    })
+  }
+
+  const html = $el[0].outerHTML
   const stripped = stripReactIdAttributes(html)
   const options = {
     wrap_line_length: 80,
@@ -42,6 +61,7 @@ const serializeReactToHTML = (el$) => {
     wrap_attributes: 'force'
   }
   const pretty = beautify(stripped, options)
+
   return pretty
 }
 

@@ -19,6 +19,7 @@ const {
 function compareValues ({ expected, value }) {
   const noColor = true
   const json = true
+
   return compare({ expected, value, noColor, json })
 }
 
@@ -45,6 +46,7 @@ function registerCypressSnapshot () {
       // eslint-disable-next-line immutable/no-mutation
       counters[key] = 1
     }
+
     return counters[key]
   }
 
@@ -54,6 +56,7 @@ function registerCypressSnapshot () {
     la(is.string(js), 'expected JavaScript snapshot source', js)
     console.log('read snapshots.js file')
     const store = eval(js) || {}
+
     console.log('have %d snapshot(s)', countSnapshots(store))
     storeSnapshot = initStore(store)
   }
@@ -67,6 +70,7 @@ function registerCypressSnapshot () {
 
   function getTestName (test) {
     const names = itsName(test)
+
     // la(is.strings(names), 'could not get name from current test', test)
     return names
   }
@@ -75,7 +79,9 @@ function registerCypressSnapshot () {
     const names = getTestName(test)
     const key = names.join(' - ')
     const index = humanName || getSnapshotIndex(key)
+
     names.push(String(index))
+
     return names
   }
 
@@ -87,11 +93,13 @@ function registerCypressSnapshot () {
 
     // show just the last part of the name list (the index)
     const message = Cypress._.last(name)
+
     console.log('current snapshot name', name)
 
     const devToolsLog = {
       value
     }
+
     if (Cypress.dom.isJquery($el)) {
       // only add DOM elements, otherwise "expected" value is enough
       devToolsLog.$el = $el
@@ -109,6 +117,7 @@ function registerCypressSnapshot () {
 
     const cyRaiser = ({ value, expected }) => {
       const result = compareValues({ expected, value })
+
       result.orElse((json) => {
         // by deleting property and adding it at the last position
         // we reorder how the object is displayed
@@ -136,14 +145,16 @@ function registerCypressSnapshot () {
     if (Cypress.dom.isJquery(value)) {
       return asJson ? serializeDomElement : serializeReactToHTML
     }
+
     return identity
   }
 
-  function snapshot (value, { name, json } = {}) {
-    console.log('human name', name)
+  function snapshot (value, { name, json, not } = {}) {
+    console.log('human name', name, json, not)
     const snapshotName = getSnapshotName(this.test, name)
     const serializer = pickSerializer(json, value)
-    const serialized = serializer(value)
+    const serialized = serializer(value, { not })
+
     setSnapshot(snapshotName, serialized, value)
 
     // always just pass value
@@ -155,12 +166,14 @@ function registerCypressSnapshot () {
   global.after(function saveSnapshots () {
     if (storeSnapshot) {
       const snapshots = storeSnapshot()
+
       console.log('%d snapshot(s) on finish', countSnapshots(snapshots))
       console.log(snapshots)
 
       snapshots.__version = Cypress.version
       const s = JSON.stringify(snapshots, null, 2)
       const str = `module.exports = ${s}\n`
+
       cy.writeFile(SNAPSHOT_FILENAME, str, 'utf-8', { log: false })
     }
   })
