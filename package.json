@@ -16,7 +16,6 @@
       ],
       "pre-push": [
         "npm run unused-deps",
-        "npm run secure",
         "npm run license",
         "npm run ban -- --all",
         "npm run size"
@@ -58,7 +57,6 @@
     "license": "license-checker --production --onlyunknown --csv",
     "lint": "eslint --fix src/*.js",
     "pretest": "npm run lint",
-    "secure": "nsp check",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "npm run unit",
     "unit": "mocha src/*-spec.js",
