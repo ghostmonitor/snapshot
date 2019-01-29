@@ -149,11 +149,11 @@ function registerCypressSnapshot () {
     return identity
   }
 
-  function snapshot (value, { name, json, not } = {}) {
+  function snapshot (value, { name, json, not, removeClass } = {}) {
     console.log('human name', name, json, not)
     const snapshotName = getSnapshotName(this.test, name)
     const serializer = pickSerializer(json, value)
-    const serialized = serializer(value, { not })
+    const serialized = serializer(value, { not, removeClass })
 
     setSnapshot(snapshotName, serialized, value)
 

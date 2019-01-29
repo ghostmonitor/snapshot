@@ -3,11 +3,23 @@ const sd = require('@wildpeaks/snapshot-dom')
 const beautify = require('js-beautify').html
 
 // converts DOM element to a JSON object
-function serializeDomElement ($el, { not }) {
-  if (not) {
+function serializeDomElement ($el, { not, removeClass }) {
+  if (not || removeClass) {
     $el.find('*').each(function () {
-      if (Cypress.$(this).is(not)) {
+      if (not && Cypress.$(this).is(not)) {
         this.remove()
+      } else if (removeClass) {
+        if (removeClass instanceof RegExp) {
+          const classNames = Cypress.$(this).attr('class')
+
+          classNames && classNames.split(' ').map((className) => {
+            if (removeClass.test(className)) {
+              Cypress.$(this).removeClass(className)
+            }
+          })
+        } else if (Cypress.$(this).hasClass(removeClass)) {
+          Cypress.$(this).removeClass(removeClass)
+        }
       }
     })
   }
@@ -43,11 +55,23 @@ const stripReactIdAttributes = (html) => {
   return html.replace(dataReactId, '')
 }
 
-const serializeReactToHTML = ($el, { not }) => {
-  if (not) {
+const serializeReactToHTML = ($el, { not, removeClass }) => {
+  if (not || removeClass) {
     $el.find('*').each(function () {
-      if (Cypress.$(this).is(not)) {
+      if (not && Cypress.$(this).is(not)) {
         this.remove()
+      } else if (removeClass) {
+        if (removeClass instanceof RegExp) {
+          const classNames = Cypress.$(this).attr('class')
+
+          classNames && classNames.split(' ').map((className) => {
+            if (removeClass.test(className)) {
+              Cypress.$(this).removeClass(className)
+            }
+          })
+        } else if (Cypress.$(this).hasClass(removeClass)) {
+          Cypress.$(this).removeClass(removeClass)
+        }
       }
     })
   }
